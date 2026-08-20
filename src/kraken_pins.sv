@@ -31,9 +31,13 @@ module kraken_pins
   output gpio_t      gpio_oe
 );
   // mask_n: width is GPIO_W (TT cut may be 1)
-  function automatic gpio_t mask_n(logic [5:0] n);
-    if (n >= 6'(GPIO_W)) return {GPIO_W{1'b1}};
-    return gpio_t'((32'b1 << n) - 32'b1);
+  function automatic gpio_t mask_n(input logic [5:0] n);
+    begin
+      if (n >= 6'(GPIO_W))
+        mask_n = {GPIO_W{1'b1}};
+      else
+        mask_n = gpio_t'((32'b1 << n) - 32'b1);
+    end
   endfunction
 
   function automatic gpio_t apply_field(
@@ -44,10 +48,15 @@ module kraken_pins
       input data_t value
   );
     gpio_t m, v;
-    if (!enable || count == 6'd0) return cur;
-    m = mask_n(count) << base;
-    v = gpio_t'(value) << base;
-    return (cur & ~m) | (v & m);
+    begin
+      if (!enable || count == 6'd0)
+        apply_field = cur;
+      else begin
+        m = mask_n(count) << base;
+        v = gpio_t'(value) << base;
+        apply_field = (cur & ~m) | (v & m);
+      end
+    end
   endfunction
 
   always_ff @(posedge clk or negedge rst_n) begin

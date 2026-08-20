@@ -238,19 +238,25 @@ module kraken_sm
 
   function automatic data_t pins_bus();
     data_t b;
-    b = '0;
-    for (int i = 0; i < DATA_W; i++) begin
-      int unsigned idx;
-      idx = unsigned'(in_base) + unsigned'(i);
-      if (idx < GPIO_W) b[i] = gpio_in[idx];
+    integer i;
+    integer idx;
+    begin
+      b = '0;
+      for (i = 0; i < DATA_W; i = i + 1) begin
+        idx = in_base + i;
+        if (idx < GPIO_W) b[i] = gpio_in[idx];
+      end
+      pins_bus = b;
     end
-    return b;
   endfunction
 
   function automatic logic [2:0] irq_idx_f(input logic [4:0] raw);
-    logic [2:0] idx = raw[2:0];
-    if (raw[4]) idx[1:0] = idx[1:0] + sm_id;
-    return idx;
+    logic [2:0] idx;
+    begin
+      idx = raw[2:0];
+      if (raw[4]) idx[1:0] = idx[1:0] + sm_id;
+      irq_idx_f = idx;
+    end
   endfunction
 
   data_t in_bits, cur_osr, taken, src_v, val;
