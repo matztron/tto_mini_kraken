@@ -1,7 +1,5 @@
 // Shared instruction memory: 1 write port, NUM_RD read ports.
-module kraken_imem
-  import kraken_pkg::*;
-#(
+module kraken_imem #(
   parameter int unsigned NUM_RD = 1
 ) (
   input  logic                  clk,
@@ -9,13 +7,15 @@ module kraken_imem
 
   // Host program load
   input  logic                  wr_en,
-  input  pc_t                   wr_addr,
-  input  instr_t                wr_data,
+  input  kraken_pkg::pc_t       wr_addr,
+  input  kraken_pkg::instr_t    wr_data,
 
   // State-machine fetches
-  input  pc_t                   rd_addr [NUM_RD],
-  output instr_t                rd_data [NUM_RD]
+  input  kraken_pkg::pc_t       rd_addr [NUM_RD],
+  output kraken_pkg::instr_t    rd_data [NUM_RD]
 );
+  import kraken_pkg::*;
+
   instr_t mem [IMEM_DEPTH];
 
   always_ff @(posedge clk or negedge rst_n) begin

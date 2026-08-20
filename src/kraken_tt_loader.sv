@@ -11,18 +11,16 @@
 //     5 SHIFT      shiftdir + autopush/autopull
 //     6 THRESH     ui[4:0]=push_thresh, ui[7:5]=pull_thresh[2:0]
 //     7 INPIN      ui[4:0]=in_base, ui[7:5]=jmp_pin[2:0]
-module kraken_tt_loader
-  import kraken_pkg::*;
-(
+module kraken_tt_loader (
   input  logic       clk,
   input  logic       rst_n,
   input  logic [7:0] ui_in,
   input  logic [7:0] uio_in,
 
   output logic       cfg_mode,
-  output logic       imem_wr_en,
-  output pc_t        imem_wr_addr,
-  output instr_t     imem_wr_data,
+  output logic              imem_wr_en,
+  output kraken_pkg::pc_t   imem_wr_addr,
+  output kraken_pkg::instr_t imem_wr_data,
 
   output logic       exec_wr,
   output logic [7:0] exec_data,
@@ -38,6 +36,8 @@ module kraken_tt_loader
   output logic       clkdiv_hi_wr,
   output logic [7:0] clkdiv_byte
 );
+  import kraken_pkg::*;
+
   localparam logic [2:0] OP_IMEM         = 3'd0;
   localparam logic [2:0] OP_EXEC         = 3'd1;
   localparam logic [2:0] OP_PIN          = 3'd2;

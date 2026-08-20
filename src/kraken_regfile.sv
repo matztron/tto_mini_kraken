@@ -1,7 +1,5 @@
 // Scratch + shift registers for one state machine.
-module kraken_regfile
-  import kraken_pkg::*;
-(
+module kraken_regfile (
   input  logic   clk,
   input  logic   rst_n,
   input  logic   clear,      // SM_RESTART
@@ -11,16 +9,18 @@ module kraken_regfile
   input  logic   we_y,
   input  logic   we_isr,
   input  logic   we_osr,
-  input  data_t  wdata_x,
-  input  data_t  wdata_y,
-  input  data_t  wdata_isr,
-  input  data_t  wdata_osr,
+  input  kraken_pkg::data_t  wdata_x,
+  input  kraken_pkg::data_t  wdata_y,
+  input  kraken_pkg::data_t  wdata_isr,
+  input  kraken_pkg::data_t  wdata_osr,
 
-  output data_t  x,
-  output data_t  y,
-  output data_t  isr,
-  output data_t  osr
+  output kraken_pkg::data_t  x,
+  output kraken_pkg::data_t  y,
+  output kraken_pkg::data_t  isr,
+  output kraken_pkg::data_t  osr
 );
+  import kraken_pkg::*;
+
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n || clear) begin
       x   <= '0;

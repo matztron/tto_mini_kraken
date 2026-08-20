@@ -1,8 +1,6 @@
 // Kraken PIO state machine — single-cycle execute + delay + stall.
 // Tiny Tapeout cut: TX-only FIFO by default (no FJOIN / RX storage).
-module kraken_sm
-  import kraken_pkg::*;
-#(
+module kraken_sm #(
   parameter bit ENABLE_FJOIN = 1'b0,
   parameter bit ENABLE_RX    = 1'b0
 ) (
@@ -11,12 +9,12 @@ module kraken_sm
   input  logic enable,
   input  logic clk_en,
   input  logic sm_restart,          // pulse: clear SM + FIFOs
-  input  logic host_exec_stb,       // pulse: queue SM_INSTR
-  input  instr_t host_exec_instr,
-  input  logic [1:0] sm_id,
+  input  logic                  host_exec_stb,       // pulse: queue SM_INSTR
+  input  kraken_pkg::instr_t    host_exec_instr,
+  input  logic [1:0]            sm_id,
 
-  input  pc_t        wrap_bottom,
-  input  pc_t        wrap_top,
+  input  kraken_pkg::pc_t       wrap_bottom,
+  input  kraken_pkg::pc_t       wrap_top,
   input  logic [4:0] set_base,
   input  logic [2:0] set_count,
   input  logic [4:0] out_base,
@@ -41,26 +39,26 @@ module kraken_sm
   input  logic       status_sel,
   input  logic [3:0] status_n,
 
-  output pc_t    imem_addr,
-  input  instr_t imem_data,
+  output kraken_pkg::pc_t    imem_addr,
+  input  kraken_pkg::instr_t imem_data,
 
-  input  gpio_t gpio_in,
-  output gpio_t gpio_out,
-  output gpio_t gpio_oe,
+  input  kraken_pkg::gpio_t gpio_in,
+  output kraken_pkg::gpio_t gpio_out,
+  output kraken_pkg::gpio_t gpio_oe,
 
-  input  logic [NUM_IRQ-1:0] irq_flags,
-  output logic [NUM_IRQ-1:0] irq_set,
-  output logic [NUM_IRQ-1:0] irq_clr,
+  input  logic [kraken_pkg::NUM_IRQ-1:0] irq_flags,
+  output logic [kraken_pkg::NUM_IRQ-1:0] irq_set,
+  output logic [kraken_pkg::NUM_IRQ-1:0] irq_clr,
 
-  input  logic  tx_push,
-  input  data_t tx_data,
-  output logic  tx_full,
-  input  logic  rx_pop,
-  output data_t rx_data,
-  output logic  rx_empty,
+  input  logic              tx_push,
+  input  kraken_pkg::data_t tx_data,
+  output logic              tx_full,
+  input  logic              rx_pop,
+  output kraken_pkg::data_t rx_data,
+  output logic              rx_empty,
 
   // Host debug / status
-  output pc_t        dbg_pc,
+  output kraken_pkg::pc_t   dbg_pc,
   output logic [3:0] tx_level_o,
   output logic [3:0] rx_level_o,
   output logic       fdbg_txover,
@@ -71,6 +69,8 @@ module kraken_sm
   output logic       dbg_executing,
   output logic       dbg_stalled
 );
+  import kraken_pkg::*;
+
   pc_t pc, next_pc_r, seq_pc, next_pc_c, jmp_target;
   logic [4:0] delay_rem;
   logic pending_exec, host_pending;

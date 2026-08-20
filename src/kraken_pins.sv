@@ -1,8 +1,6 @@
 // Pin mapper: SET / OUT / side-set onto GPIO level + OE.
 // Side-set wins over SET/OUT on the same pin in the same cycle.
-module kraken_pins
-  import kraken_pkg::*;
-(
+module kraken_pins (
   input  logic   clk,
   input  logic   rst_n,
   input  logic   tick,       // SET / OUT (executing, not stalled)
@@ -21,15 +19,17 @@ module kraken_pins
 
   input  logic       do_out_pins,
   input  logic       do_out_pindirs,
-  input  data_t      out_data,
+  input  kraken_pkg::data_t      out_data,
 
   input  logic       do_side,
   input  logic       side_pindir,
   input  logic [4:0] side_imm,
 
-  output gpio_t      gpio_out,
-  output gpio_t      gpio_oe
+  output kraken_pkg::gpio_t      gpio_out,
+  output kraken_pkg::gpio_t      gpio_oe
 );
+  import kraken_pkg::*;
+
   // mask_n: width is GPIO_W (TT cut may be 1)
   function automatic gpio_t mask_n(input logic [5:0] n);
     begin

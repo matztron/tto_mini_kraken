@@ -1,23 +1,23 @@
 // Simple synchronous FIFO for PIO TX/RX.
-module kraken_fifo
-  import kraken_pkg::*;
-#(
-  parameter int unsigned DEPTH = FIFO_DEPTH
+module kraken_fifo #(
+  parameter int unsigned DEPTH = kraken_pkg::FIFO_DEPTH
 ) (
-  input  logic  clk,
-  input  logic  rst_n,
-  input  logic  clear,   // sync clear (SM_RESTART)
+  input  logic              clk,
+  input  logic              rst_n,
+  input  logic              clear,   // sync clear (SM_RESTART)
 
-  input  logic  push,
-  input  data_t push_data,
-  output logic  full,
+  input  logic              push,
+  input  kraken_pkg::data_t push_data,
+  output logic              full,
 
-  input  logic  pop,
-  output data_t pop_data,
-  output logic  empty,
+  input  logic              pop,
+  output kraken_pkg::data_t pop_data,
+  output logic              empty,
 
   output logic [$clog2(DEPTH+1)-1:0] level
 );
+  import kraken_pkg::*;
+
   localparam int unsigned AW = $clog2(DEPTH);
 
   data_t mem [DEPTH];

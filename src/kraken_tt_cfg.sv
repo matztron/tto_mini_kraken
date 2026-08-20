@@ -1,7 +1,5 @@
 // Tiny Tapeout PIO tile — runtime SM configuration (loaded via pins).
-module kraken_tt_cfg
-  import kraken_pkg::*;
-(
+module kraken_tt_cfg (
   input  logic       clk,
   input  logic       rst_n,
 
@@ -19,8 +17,8 @@ module kraken_tt_cfg
   input  logic       clkdiv_hi_wr,
   input  logic [7:0] clkdiv_byte,
 
-  output pc_t        wrap_bottom,
-  output pc_t        wrap_top,
+  output kraken_pkg::pc_t        wrap_bottom,
+  output kraken_pkg::pc_t        wrap_top,
   output logic       side_en,
   output logic       side_pindir,
   output logic [2:0] set_count,
@@ -36,6 +34,8 @@ module kraken_tt_cfg
   output logic [4:0] pull_thresh,
   output logic [15:0] clkdiv_int
 );
+  import kraken_pkg::*;
+
   localparam logic [15:0] CLKDIV_RST = 16'd1;
 
   always_ff @(posedge clk or negedge rst_n) begin

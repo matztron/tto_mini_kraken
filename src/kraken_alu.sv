@@ -1,13 +1,13 @@
 // Small ALU for scratch ops (X--, compares later) and immediate expand.
-module kraken_alu
-  import kraken_pkg::*;
-(
-  input  alu_op_e op,
-  input  data_t   a,
-  input  data_t   b,
-  output data_t   y,
-  output logic    z   // result == 0
+module kraken_alu (
+  input  kraken_pkg::alu_op_e op,
+  input  kraken_pkg::data_t   a,
+  input  kraken_pkg::data_t   b,
+  output kraken_pkg::data_t   y,
+  output logic                z   // result == 0
 );
+  import kraken_pkg::*;
+
   always_comb begin
     unique case (op)
       ALU_PASS_A: y = a;
