@@ -20,7 +20,12 @@ module kraken_regfile (
   output kraken_pkg::data_t  osr
 );
   always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n || clear) begin
+    if (!rst_n) begin
+      x   <= '0;
+      y   <= '0;
+      isr <= '0;
+      osr <= '0;
+    end else if (clear) begin
       x   <= '0;
       y   <= '0;
       isr <= '0;
