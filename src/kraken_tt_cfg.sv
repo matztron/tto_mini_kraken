@@ -34,7 +34,7 @@ module kraken_tt_cfg (
   output logic [4:0] pull_thresh,
   output logic [15:0] clkdiv_int
 );
-  import kraken_pkg::*;
+  typedef kraken_pkg::pc_t pc_t;
 
   localparam logic [15:0] CLKDIV_RST = 16'd1;
 
@@ -58,8 +58,8 @@ module kraken_tt_cfg (
       clkdiv_int    <= CLKDIV_RST;
     end else begin
       if (exec_wr) begin
-        wrap_bottom <= pc_t'(exec_data[3:0]);
-        wrap_top    <= pc_t'(exec_data[7:4]);
+        wrap_bottom <= kraken_pkg::pc_t'(exec_data[3:0]);
+        wrap_top    <= kraken_pkg::pc_t'(exec_data[7:4]);
       end
       if (pin_wr) begin
         set_count     <= {1'b0, pin_data[1:0]};

@@ -16,7 +16,7 @@ module kraken_fifo #(
 
   output logic [$clog2(DEPTH+1)-1:0] level
 );
-  import kraken_pkg::*;
+  typedef kraken_pkg::data_t data_t;
 
   localparam int unsigned AW = $clog2(DEPTH);
 

@@ -36,7 +36,8 @@ module kraken_tt_loader (
   output logic       clkdiv_hi_wr,
   output logic [7:0] clkdiv_byte
 );
-  import kraken_pkg::*;
+  typedef kraken_pkg::pc_t    pc_t;
+  typedef kraken_pkg::instr_t instr_t;
 
   localparam logic [2:0] OP_IMEM         = 3'd0;
   localparam logic [2:0] OP_EXEC         = 3'd1;
@@ -86,8 +87,8 @@ module kraken_tt_loader (
 
   always_comb begin
     imem_wr_en       = 1'b0;
-    imem_wr_addr     = pc_t'({2'b0, imem_addr_q});
-    imem_wr_data     = instr_t'({ui_in, imem_lo});
+    imem_wr_addr     = kraken_pkg::pc_t'({2'b0, imem_addr_q});
+    imem_wr_data     = kraken_pkg::instr_t'({ui_in, imem_lo});
     exec_wr          = 1'b0;
     exec_data        = ui_in;
     pin_wr           = 1'b0;

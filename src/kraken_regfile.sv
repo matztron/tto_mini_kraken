@@ -19,8 +19,6 @@ module kraken_regfile (
   output kraken_pkg::data_t  isr,
   output kraken_pkg::data_t  osr
 );
-  import kraken_pkg::*;
-
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n || clear) begin
       x   <= '0;

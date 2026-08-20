@@ -69,7 +69,25 @@ module kraken_sm #(
   output logic       dbg_executing,
   output logic       dbg_stalled
 );
-  import kraken_pkg::*;
+
+  typedef kraken_pkg::instr_t      instr_t;
+  typedef kraken_pkg::data_t       data_t;
+  typedef kraken_pkg::pc_t         pc_t;
+  typedef kraken_pkg::gpio_t      gpio_t;
+  typedef kraken_pkg::decoded_t   decoded_t;
+  typedef kraken_pkg::opcode_e    opcode_e;
+  typedef kraken_pkg::alu_op_e    alu_op_e;
+  typedef kraken_pkg::jmp_cond_e  jmp_cond_e;
+  typedef kraken_pkg::wait_src_e  wait_src_e;
+  typedef kraken_pkg::op_sel_e    op_sel_e;
+  typedef kraken_pkg::mov_op_e    mov_op_e;
+  typedef kraken_pkg::set_dst_e   set_dst_e;
+  typedef kraken_pkg::status_sel_e status_sel_e;
+  localparam int unsigned GPIO_W          = kraken_pkg::GPIO_W;
+  localparam int unsigned DATA_W          = kraken_pkg::DATA_W;
+  localparam int unsigned NUM_IRQ         = kraken_pkg::NUM_IRQ;
+  localparam int unsigned FIFO_DEPTH      = kraken_pkg::FIFO_DEPTH;
+  localparam int unsigned FIFO_JOIN_DEPTH = kraken_pkg::FIFO_JOIN_DEPTH;
 
   pc_t pc, next_pc_r, seq_pc, next_pc_c, jmp_target;
   logic [4:0] delay_rem;
@@ -100,9 +118,9 @@ module kraken_sm #(
 
   logic [4:0] instr_delay, side_imm;
   logic do_side;
-  assign instr_delay = delay_from_sideset_field(dec.delay_sideset, sideset_count, side_en);
-  assign do_side     = side_valid_from_field(dec.delay_sideset, sideset_count, side_en);
-  assign side_imm    = side_data_from_field(dec.delay_sideset, sideset_count, side_en);
+  assign instr_delay = kraken_pkg::delay_from_sideset_field(dec.delay_sideset, sideset_count, side_en);
+  assign do_side     = kraken_pkg::side_valid_from_field(dec.delay_sideset, sideset_count, side_en);
+  assign side_imm    = kraken_pkg::side_data_from_field(dec.delay_sideset, sideset_count, side_en);
 
   logic we_x, we_y, we_isr, we_osr;
   data_t wdata_x, wdata_y, wdata_isr, wdata_osr, x, y, isr, osr;
@@ -230,10 +248,10 @@ module kraken_sm #(
   logic [5:0] push_th, pull_th;
   logic osr_empty;
   data_t status_val;
-  assign push_th   = thresh_decode(push_thresh);
-  assign pull_th   = thresh_decode(pull_thresh);
+  assign push_th   = kraken_pkg::thresh_decode(push_thresh);
+  assign pull_th   = kraken_pkg::thresh_decode(pull_thresh);
   assign osr_empty = (osr_count >= pull_th);
-  assign status_val = ((status_sel == STATUS_RXLEVEL ? rx_level : tx_level) < status_n)
+  assign status_val = ((status_sel == kraken_pkg::STATUS_RXLEVEL ? rx_level : tx_level) < status_n)
                       ? '1 : '0;
 
   function automatic data_t pins_bus();
@@ -270,69 +288,69 @@ module kraken_sm #(
     wdata_isr_count = isr_count; wdata_osr_count = osr_count;
     do_set_pins = 0; do_set_pindirs = 0; do_out_pins = 0; do_out_pindirs = 0;
     out_data = '0; set_imm = dec.arg2;
-    alu_op = ALU_PASS_A; alu_a = x; alu_b = '0;
+    alu_op = kraken_pkg::ALU_PASS_A; alu_a = x; alu_b = '0;
     sm_rx_push = 0; sm_rx_data = isr; sm_tx_pop = 0;
     irq_set = '0; irq_clr = '0;
-    stall = 0; jmp_taken = 0; jmp_target = pc_t'(dec.arg2);
+    stall = 0; jmp_taken = 0; jmp_target = kraken_pkg::pc_t'(dec.arg2);
     ignore_delay = host_pending; request_exec = 0; request_exec_instr = '0;
     in_bits = '0; cur_osr = osr; taken = '0; src_v = '0; val = '0;
     nbits = '0; cur_cnt = osr_count; iidx = '0;
     sm_txunder_ev = 0; sm_rxover_ev = 0;
 
-    seq_pc = (pc == wrap_top) ? wrap_bottom : (pc + pc_t'(1));
+    seq_pc = (pc == wrap_top) ? wrap_bottom : (pc + kraken_pkg::pc_t'(1));
 
     if (irq_hold) stall = irq_flags[irq_hold_idx];
 
     if (do_exec && !irq_hold) begin
-      nbits = bit_count_decode(dec.arg2);
+      nbits = kraken_pkg::bit_count_decode(dec.arg2);
       iidx  = irq_idx_f(dec.arg2);
 
       unique case (dec.opcode)
-        OPC_JMP: begin
-          unique case (jmp_cond_e'(dec.arg1))
-            JMP_ALWAYS: jmp_taken = 1;
-            JMP_NOT_X:  jmp_taken = (x == '0);
-            JMP_X_DEC: if (x != '0) begin
-              jmp_taken = 1; we_x = 1; wdata_x = x - data_t'(1);
+        kraken_pkg::OPC_JMP: begin
+          unique case (dec.arg1)
+            kraken_pkg::JMP_ALWAYS: jmp_taken = 1;
+            kraken_pkg::JMP_NOT_X:  jmp_taken = (x == '0);
+            kraken_pkg::JMP_X_DEC: if (x != '0) begin
+              jmp_taken = 1; we_x = 1; wdata_x = x - kraken_pkg::data_t'(1);
             end
-            JMP_NOT_Y: jmp_taken = (y == '0);
-            JMP_Y_DEC: if (y != '0) begin
-              jmp_taken = 1; we_y = 1; wdata_y = y - data_t'(1);
+            kraken_pkg::JMP_NOT_Y: jmp_taken = (y == '0);
+            kraken_pkg::JMP_Y_DEC: if (y != '0) begin
+              jmp_taken = 1; we_y = 1; wdata_y = y - kraken_pkg::data_t'(1);
             end
-            JMP_X_NE_Y:   jmp_taken = (x != y);
-            JMP_PIN:      jmp_taken = (jmp_pin < GPIO_W) ? gpio_in[jmp_pin] : 1'b0;
-            JMP_NOT_OSRE: jmp_taken = osr_empty;
+            kraken_pkg::JMP_X_NE_Y:   jmp_taken = (x != y);
+            kraken_pkg::JMP_PIN:      jmp_taken = (jmp_pin < GPIO_W) ? gpio_in[jmp_pin] : 1'b0;
+            kraken_pkg::JMP_NOT_OSRE: jmp_taken = osr_empty;
             default: ;
           endcase
         end
 
-        OPC_WAIT: begin
-          unique case (wait_src_e'(dec.arg1[1:0]))
-            WAIT_GPIO: stall = (dec.arg2 < GPIO_W) ? (gpio_in[dec.arg2] != dec.arg1[2]) : 1'b1;
-            WAIT_PIN: begin
+        kraken_pkg::OPC_WAIT: begin
+          unique case (dec.arg1[1:0])
+            kraken_pkg::WAIT_GPIO: stall = (dec.arg2 < GPIO_W) ? (gpio_in[dec.arg2] != dec.arg1[2]) : 1'b1;
+            kraken_pkg::WAIT_PIN: begin
               if (5'(in_base + dec.arg2) < GPIO_W)
                 stall = (gpio_in[5'(in_base + dec.arg2)] != dec.arg1[2]);
               else
                 stall = 1'b1;
             end
-            WAIT_IRQ:  stall = (iidx < NUM_IRQ) && (irq_flags[iidx] != dec.arg1[2]);
+            kraken_pkg::WAIT_IRQ:  stall = (iidx < NUM_IRQ) && (irq_flags[iidx] != dec.arg1[2]);
             default: ;
           endcase
         end
 
-        OPC_IN: begin
-          unique case (op_sel_e'(dec.arg1))
-            OP_PINS: in_bits = pins_bus();
-            OP_X:    in_bits = x;
-            OP_Y:    in_bits = y;
-            OP_NULL: in_bits = '0;
-            OP_ISR:  in_bits = isr;
-            OP_OSR:  in_bits = osr;
+        kraken_pkg::OPC_IN: begin
+          unique case (dec.arg1)
+            kraken_pkg::OP_PINS: in_bits = pins_bus();
+            kraken_pkg::OP_X:    in_bits = x;
+            kraken_pkg::OP_Y:    in_bits = y;
+            kraken_pkg::OP_NULL: in_bits = '0;
+            kraken_pkg::OP_ISR:  in_bits = isr;
+            kraken_pkg::OP_OSR:  in_bits = osr;
             default: in_bits = '0;
           endcase
-          if (nbits < 6'(DATA_W)) in_bits = in_bits & ((data_t'(1) << nbits) - 1);
+          if (nbits < 6'(DATA_W)) in_bits = in_bits & ((kraken_pkg::data_t'(1) << nbits) - 1);
           we_isr = 1;
-          wdata_isr = isr_shift_in(isr, in_bits, nbits, in_shiftdir);
+          wdata_isr = kraken_pkg::isr_shift_in(isr, in_bits, nbits, in_shiftdir);
           we_isr_count = 1;
           wdata_isr_count = (isr_count + nbits > 6'(DATA_W)) ? 6'(DATA_W) : isr_count + nbits;
           if (autopush && wdata_isr_count >= push_th) begin
@@ -344,7 +362,7 @@ module kraken_sm #(
           end
         end
 
-        OPC_OUT: begin
+        kraken_pkg::OPC_OUT: begin
           cur_osr = osr;
           cur_cnt = osr_count;
           if (autopull && osr_empty) begin
@@ -352,22 +370,22 @@ module kraken_sm #(
             else begin sm_tx_pop = 1; cur_osr = tx_pop_data; cur_cnt = '0; end
           end
           if (!stall) begin
-            taken = osr_take(cur_osr, nbits, out_shiftdir);
+            taken = kraken_pkg::osr_take(cur_osr, nbits, out_shiftdir);
             we_osr = 1;
-            wdata_osr = osr_shifted(cur_osr, nbits, out_shiftdir);
+            wdata_osr = kraken_pkg::osr_shifted(cur_osr, nbits, out_shiftdir);
             we_osr_count = 1;
             wdata_osr_count = (cur_cnt + nbits > 6'(DATA_W)) ? 6'(DATA_W) : cur_cnt + nbits;
-            unique case (op_sel_e'(dec.arg1))
-              OP_PINS: begin do_out_pins = 1; out_data = taken; end
-              OP_X: begin we_x = 1; wdata_x = taken; end
-              OP_Y: begin we_y = 1; wdata_y = taken; end
-              OP_NULL: ;
-              OP_PINDIRS: begin do_out_pindirs = 1; out_data = taken; end
-              OP_PC_STAT: begin jmp_taken = 1; jmp_target = pc_t'(taken); end
-              OP_ISR: begin we_isr = 1; wdata_isr = taken; end
-              OP_OSR: begin
+            unique case (dec.arg1)
+              kraken_pkg::OP_PINS: begin do_out_pins = 1; out_data = taken; end
+              kraken_pkg::OP_X: begin we_x = 1; wdata_x = taken; end
+              kraken_pkg::OP_Y: begin we_y = 1; wdata_y = taken; end
+              kraken_pkg::OP_NULL: ;
+              kraken_pkg::OP_PINDIRS: begin do_out_pindirs = 1; out_data = taken; end
+              kraken_pkg::OP_PC_STAT: begin jmp_taken = 1; jmp_target = kraken_pkg::pc_t'(taken); end
+              kraken_pkg::OP_ISR: begin we_isr = 1; wdata_isr = taken; end
+              kraken_pkg::OP_OSR: begin
                 request_exec = 1;
-                request_exec_instr = instr_t'(taken);
+                request_exec_instr = kraken_pkg::instr_t'(taken);
                 ignore_delay = 1;
               end
               default: ;
@@ -375,7 +393,7 @@ module kraken_sm #(
           end
         end
 
-        OPC_PUSH_PULL: begin
+        kraken_pkg::OPC_PUSH_PULL: begin
           if (!dec.is_pull) begin
             if (!dec.arg1[1] || isr_count >= push_th) begin
               if (rx_full) begin
@@ -402,39 +420,39 @@ module kraken_sm #(
           end
         end
 
-        OPC_MOV: begin
-          unique case (op_sel_e'(instr[2:0]))
-            OP_PINS: src_v = pins_bus();
-            OP_X: src_v = x;
-            OP_Y: src_v = y;
-            OP_NULL: src_v = '0;
-            OP_PC_STAT: src_v = status_val;
-            OP_ISR: src_v = isr;
-            OP_OSR: src_v = osr;
+        kraken_pkg::OPC_MOV: begin
+          unique case (instr[2:0])
+            kraken_pkg::OP_PINS: src_v = pins_bus();
+            kraken_pkg::OP_X: src_v = x;
+            kraken_pkg::OP_Y: src_v = y;
+            kraken_pkg::OP_NULL: src_v = '0;
+            kraken_pkg::OP_PC_STAT: src_v = status_val;
+            kraken_pkg::OP_ISR: src_v = isr;
+            kraken_pkg::OP_OSR: src_v = osr;
             default: src_v = '0;
           endcase
-          unique case (mov_op_e'(instr[4:3]))
-            MOV_INVERT: val = ~src_v;
-            MOV_REVERSE: val = bit_reverse32(src_v);
+          unique case (instr[4:3])
+            kraken_pkg::MOV_INVERT: val = ~src_v;
+            kraken_pkg::MOV_REVERSE: val = kraken_pkg::bit_reverse32(src_v);
             default: val = src_v;
           endcase
-          unique case (op_sel_e'(instr[7:5]))
-            OP_PINS: begin do_out_pins = 1; out_data = val; end
-            OP_X: begin we_x = 1; wdata_x = val; end
-            OP_Y: begin we_y = 1; wdata_y = val; end
-            OP_PINDIRS: begin
+          unique case (instr[7:5])
+            kraken_pkg::OP_PINS: begin do_out_pins = 1; out_data = val; end
+            kraken_pkg::OP_X: begin we_x = 1; wdata_x = val; end
+            kraken_pkg::OP_Y: begin we_y = 1; wdata_y = val; end
+            kraken_pkg::OP_PINDIRS: begin
               request_exec = 1;
-              request_exec_instr = instr_t'(val);
+              request_exec_instr = kraken_pkg::instr_t'(val);
               ignore_delay = 1;
             end
-            OP_PC_STAT: begin jmp_taken = 1; jmp_target = pc_t'(val); end
-            OP_ISR: begin we_isr = 1; wdata_isr = val; end
-            OP_OSR: begin we_osr = 1; wdata_osr = val; end
+            kraken_pkg::OP_PC_STAT: begin jmp_taken = 1; jmp_target = kraken_pkg::pc_t'(val); end
+            kraken_pkg::OP_ISR: begin we_isr = 1; wdata_isr = val; end
+            kraken_pkg::OP_OSR: begin we_osr = 1; wdata_osr = val; end
             default: ;
           endcase
         end
 
-        OPC_IRQ: begin
+        kraken_pkg::OPC_IRQ: begin
           if (iidx < NUM_IRQ) begin
             if (dec.arg1[1]) irq_clr[iidx] = 1;
             else             irq_set[iidx] = 1;
@@ -445,12 +463,12 @@ module kraken_sm #(
           end
         end
 
-        OPC_SET: begin
-          unique case (set_dst_e'(dec.arg1))
-            SET_DST_PINS: do_set_pins = 1;
-            SET_DST_X: begin we_x = 1; wdata_x = data_t'(dec.arg2); end
-            SET_DST_Y: begin we_y = 1; wdata_y = data_t'(dec.arg2); end
-            SET_DST_PINDIRS: do_set_pindirs = 1;
+        kraken_pkg::OPC_SET: begin
+          unique case (dec.arg1)
+            kraken_pkg::SET_DST_PINS: do_set_pins = 1;
+            kraken_pkg::SET_DST_X: begin we_x = 1; wdata_x = kraken_pkg::data_t'(dec.arg2); end
+            kraken_pkg::SET_DST_Y: begin we_y = 1; wdata_y = kraken_pkg::data_t'(dec.arg2); end
+            kraken_pkg::SET_DST_PINDIRS: do_set_pindirs = 1;
             default: ;
           endcase
         end
@@ -501,7 +519,7 @@ module kraken_sm #(
           delay_rem <= delay_rem - 5'd1;
           if (delay_rem == 5'd1) pc <= next_pc_r;
         end else if (do_exec) begin
-          if (!irq_hold && dec.opcode == OPC_IRQ && dec.arg1[0] && !dec.arg1[1]) begin
+          if (!irq_hold && dec.opcode == kraken_pkg::OPC_IRQ && dec.arg1[0] && !dec.arg1[1]) begin
             irq_hold <= 1;
             irq_hold_idx <= irq_idx_f(dec.arg2);
           end

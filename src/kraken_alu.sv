@@ -6,14 +6,12 @@ module kraken_alu (
   output kraken_pkg::data_t   y,
   output logic                z   // result == 0
 );
-  import kraken_pkg::*;
-
   always_comb begin
     unique case (op)
-      ALU_PASS_A: y = a;
-      ALU_DEC:    y = a - data_t'(1);
-      ALU_ADD:    y = a + b;
-      ALU_SUB:    y = a - b;
+      kraken_pkg::ALU_PASS_A: y = a;
+      kraken_pkg::ALU_DEC:    y = a - kraken_pkg::data_t'(1);
+      kraken_pkg::ALU_ADD:    y = a + b;
+      kraken_pkg::ALU_SUB:    y = a - b;
       default:    y = a;
     endcase
     z = (y == '0);

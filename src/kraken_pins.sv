@@ -28,7 +28,9 @@ module kraken_pins (
   output kraken_pkg::gpio_t      gpio_out,
   output kraken_pkg::gpio_t      gpio_oe
 );
-  import kraken_pkg::*;
+  typedef kraken_pkg::data_t data_t;
+  typedef kraken_pkg::gpio_t gpio_t;
+  localparam int unsigned GPIO_W = kraken_pkg::GPIO_W;
 
   // mask_n: width is GPIO_W (TT cut may be 1)
   function automatic gpio_t mask_n(input logic [5:0] n);
@@ -36,7 +38,7 @@ module kraken_pins (
       if (n >= 6'(GPIO_W))
         mask_n = {GPIO_W{1'b1}};
       else
-        mask_n = gpio_t'((32'b1 << n) - 32'b1);
+        mask_n = kraken_pkg::gpio_t'((32'b1 << n) - 32'b1);
     end
   endfunction
 
@@ -53,7 +55,7 @@ module kraken_pins (
         apply_field = cur;
       else begin
         m = mask_n(count) << base;
-        v = gpio_t'(value) << base;
+        v = kraken_pkg::gpio_t'(value) << base;
         apply_field = (cur & ~m) | (v & m);
       end
     end
@@ -68,16 +70,16 @@ module kraken_pins (
       o = gpio_out;
       e = gpio_oe;
       if (tick) begin
-        o = apply_field(o, do_set_pins, {3'b0, set_count}, set_base, data_t'(set_imm));
+        o = apply_field(o, do_set_pins, {3'b0, set_count}, set_base, kraken_pkg::data_t'(set_imm));
         o = apply_field(o, do_out_pins, out_count, out_base, out_data);
-        e = apply_field(e, do_set_pindirs, {3'b0, set_count}, set_base, data_t'(set_imm));
+        e = apply_field(e, do_set_pindirs, {3'b0, set_count}, set_base, kraken_pkg::data_t'(set_imm));
         e = apply_field(e, do_out_pindirs, out_count, out_base, out_data);
       end
       if (side_tick && do_side) begin
         if (side_pindir)
-          e = apply_field(e, 1'b1, {3'b0, sideset_count}, sideset_base, data_t'(side_imm));
+          e = apply_field(e, 1'b1, {3'b0, sideset_count}, sideset_base, kraken_pkg::data_t'(side_imm));
         else
-          o = apply_field(o, 1'b1, {3'b0, sideset_count}, sideset_base, data_t'(side_imm));
+          o = apply_field(o, 1'b1, {3'b0, sideset_count}, sideset_base, kraken_pkg::data_t'(side_imm));
       end
       gpio_out <= o;
       gpio_oe  <= e;

@@ -24,7 +24,12 @@ module tt_um_kraken_mini (
   input  logic       clk,
   input  logic       rst_n
 );
-  import kraken_pkg::*;
+  typedef kraken_pkg::instr_t instr_t;
+  typedef kraken_pkg::data_t  data_t;
+  typedef kraken_pkg::pc_t    pc_t;
+  typedef kraken_pkg::gpio_t  gpio_t;
+  localparam int unsigned GPIO_W  = kraken_pkg::GPIO_W;
+  localparam int unsigned NUM_IRQ = kraken_pkg::NUM_IRQ;
 
   logic cfg_mode;
   logic imem_wr_en;
@@ -85,8 +90,8 @@ module tt_um_kraken_mini (
   assign restart_raw = !cfg_mode && uio_in[2];
   assign rx_pop_raw  = !cfg_mode && uio_in[3];
   assign sm_enable   = ena && !cfg_mode && uio_in[1];
-  assign tx_data     = data_t'(ui_in);
-  assign gpio_in     = gpio_t'(ui_in[GPIO_W-1:0]);
+  assign tx_data     = kraken_pkg::data_t'(ui_in);
+  assign gpio_in     = kraken_pkg::gpio_t'(ui_in[GPIO_W-1:0]);
 
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
@@ -207,8 +212,8 @@ module tt_um_kraken_mini (
     .wr_en    (imem_wr_en),
     .wr_addr  (imem_wr_addr),
     .wr_data  (imem_wr_data),
-    .rd_addr  ('{imem_addr}),
-    .rd_data  ('{imem_data})
+    .rd_addr  (imem_addr),
+    .rd_data  (imem_data)
   );
 
   kraken_sm #(

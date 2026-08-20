@@ -1,7 +1,5 @@
-// Shared instruction memory: 1 write port, NUM_RD read ports.
-module kraken_imem #(
-  parameter int unsigned NUM_RD = 1
-) (
+// Shared instruction memory: 1 write port, 1 read port (TT / Yosys cut).
+module kraken_imem (
   input  logic                  clk,
   input  logic                  rst_n,
 
@@ -10,11 +8,12 @@ module kraken_imem #(
   input  kraken_pkg::pc_t       wr_addr,
   input  kraken_pkg::instr_t    wr_data,
 
-  // State-machine fetches
-  input  kraken_pkg::pc_t       rd_addr [NUM_RD],
-  output kraken_pkg::instr_t    rd_data [NUM_RD]
+  // State-machine fetch
+  input  kraken_pkg::pc_t       rd_addr,
+  output kraken_pkg::instr_t    rd_data
 );
-  import kraken_pkg::*;
+  typedef kraken_pkg::instr_t instr_t;
+  localparam int unsigned IMEM_DEPTH = kraken_pkg::IMEM_DEPTH;
 
   instr_t mem [IMEM_DEPTH];
 
@@ -28,9 +27,5 @@ module kraken_imem #(
     end
   end
 
-  always_comb begin
-    for (int r = 0; r < NUM_RD; r++) begin
-      rd_data[r] = mem[rd_addr[r]];
-    end
-  end
+  assign rd_data = mem[rd_addr];
 endmodule
