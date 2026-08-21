@@ -55,13 +55,14 @@ Pulse **`uio[0]`** (rising edge) to apply the operation selected on **`uio[6:4]`
 
 ### RTL simulation
 
-From the `test/` directory:
+From the `test/` directory (requires [pioasm](https://github.com/raspberrypi/pico-sdk/tree/master/tools/pioasm) on `PATH`, or macOS pico-sdk-tools):
 
 ```sh
-make -B
+make assemble   # hello_world.pio → generated/hello_world.hex
+make -B         # cocotb: pin-load IMEM, enable SM, check uo[0] square wave
 ```
 
-This runs the cocotb testbench against the Verilog sources. Adapt `test/tb.v` and `test/test.py` to drive config-mode programming, assert `sm_enable`, push TX bytes, and check GPIO/FIFO status.
+The default test loads a two-instruction SET-pin square wave through config mode (`uio[7]=1`), then enables the SM in run mode and checks `uo[0]` toggles `1,1,0,0,...`.
 
 ### On silicon (Tiny Tapeout IHP demo board)
 

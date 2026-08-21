@@ -1,47 +1,39 @@
-# Sample testbench for a Tiny Tapeout project
+# Sample testbench for the Tiny Tapeout Kraken mini PIO tile
 
-This is a sample testbench for a Tiny Tapeout project. It uses [cocotb](https://docs.cocotb.org/en/stable/) to drive the DUT and check the outputs.
-See below to get started or for more information, check the [website](https://tinytapeout.com/hdl/testing/).
-
-## Setting up
-
-1. Edit [Makefile](Makefile) and modify `PROJECT_SOURCES` to point to your Verilog files.
-2. Edit [tb.v](tb.v) and replace `tt_um_example` with your module name.
+Uses [cocotb](https://docs.cocotb.org/en/stable/) plus a [pioasm](https://github.com/raspberrypi/pico-sdk/tree/master/tools/pioasm)-compiled
+`hello_world.pio` program loaded through the pin-config protocol.
 
 ## How to run
 
-To run the RTL simulation:
+Assemble the PIO program (needs `pioasm` on `PATH`, or macOS pico-sdk-tools):
+
+```sh
+make assemble
+```
+
+RTL simulation (assembles first if the hex is missing/out of date):
 
 ```sh
 make -B
 ```
 
-To run gatelevel simulation, first harden your project and copy `../runs/wokwi/results/final/verilog/gl/{your_module_name}.v` to `gate_level_netlist.v`.
-
-Then run:
+Gate-level simulation (after hardening): copy the generated netlist to
+`gate_level_netlist.v`, then:
 
 ```sh
 make -B GATES=yes
 ```
 
-If you wish to save the waveform in VCD format instead of FST format, edit tb.v to use `$dumpfile("tb.vcd");` and then run:
+## What the test checks
 
-```sh
-make -B FST=
-```
+1. `hello_world.pio` assembles to the expected SET-pin opcodes (`0xE101`, `0xE100`).
+2. Config-mode pin loader writes those words into IMEM and sets wrap / SET_COUNT.
+3. With the SM enabled, `uo[0]` produces a 50% square wave: `1,1,0,0,...`.
 
-This will generate `tb.vcd` instead of `tb.fst`.
-
-## How to view the waveform file
-
-Using GTKWave
+## Viewing waveforms
 
 ```sh
 gtkwave tb.fst tb.gtkw
-```
-
-Using Surfer
-
-```sh
+# or
 surfer tb.fst
 ```

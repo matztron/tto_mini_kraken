@@ -1,0 +1,18 @@
+; Kraken mini hello world: 50% square wave on SET pin 0.
+; Fits the pin-loader's 4-word IMEM window (only 2 instructions).
+;
+; Timing (clkdiv = 1): each instruction runs, then 1 delay cycle.
+;   SET 1 → idle → SET 0 → idle → wrap
+; so the pin is high for 2 cycles and low for 2 cycles (period 4).
+;
+; Host config for the cocotb test:
+;   - load at IMEM offset 0
+;   - wrap_bottom = 0, wrap_top = 1
+;   - SET_COUNT = 1 (SET_BASE is hardwired to 0 in the tile)
+;   - enable SM
+
+.program hello_world
+.wrap_target
+    set pins, 1 [1]
+    set pins, 0 [1]
+.wrap
