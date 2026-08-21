@@ -1,0 +1,15 @@
+# LEF generated for mini_kraken
+VERSION 5.8 ;
+NAMESCASESENSITIVE ON ;
+DIVIDERCHAR "/" ;
+BUSBITCHARS "[]" ;
+UNITS
+   DATABASE MICRONS 1000 ;
+END UNITS
+
+MACRO mini_kraken
+   CLASS BLOCK ;
+   FOREIGN mini_kraken 0 0 ;
+   SIZE 72.000 BY 72.000 ;
+   SYMMETRY X Y ;
+END mini_kraken

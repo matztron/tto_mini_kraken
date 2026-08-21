@@ -70,5 +70,22 @@
   "MAGIC_DEF_LABELS": 0,
 
   "//": "Only export pin area in LEF (without any connected nets)",
-  "MAGIC_WRITE_LEF_PINONLY": 1
+  "MAGIC_WRITE_LEF_PINONLY": 1,
+
+  "MACROS": {
+  "mini_kraken": {
+    "instances": {
+      "art": {
+        "location": [20, 10],
+        "orientation": "N"
+      }
+    },
+    "gds": ["dir::../macros/mini_kraken.gds"],
+    "lef": ["dir::../macros/mini_kraken.lef"]
+  }
+  },
+"IGNORE_DISCONNECTED_MODULES": ["mini_kraken", "art"],
+"ERROR_ON_DISCONNECTED_PINS": false
+
+
 }

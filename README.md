@@ -1,6 +1,9 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
-# Tiny Tapeout Verilog Project Template
+# mini-Kraken (a squid?) io processor
+
+![alt text](imgs/squid_1.png "project mascot")
+
 
 - [Read the documentation for project](docs/info.md)
 
