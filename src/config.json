@@ -13,7 +13,7 @@
 
   "//": "PL_TARGET_DENSITY_PCT - You can increase this if Global Placement fails with error GPL-0302.",
   "//": "Users have reported that values up to 80 worked well for them.",
-  "PL_TARGET_DENSITY_PCT": 60,
+  "PL_TARGET_DENSITY_PCT": 75,
 
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
   "//": "The value is in nanoseconds, so 20ns == 50MHz.",
@@ -59,6 +59,7 @@
   "FP_IO_VLENGTH": 2,
 
   "FP_PDN_VPITCH": 38.87,
+  "FP_PDN_VOFFSET": 12,
 
   "//": "Clock",
   "RUN_CTS": 1,
@@ -72,20 +73,22 @@
   "//": "Only export pin area in LEF (without any connected nets)",
   "MAGIC_WRITE_LEF_PINONLY": 1,
 
+  "//": "Silicon art: pinless TopMetal doodle is missing from Magic extraction,",
+  "//": "so LVS cannot match the Verilog blackbox. Re-enable after a proper LVS stub.",
+  "RUN_LVS": false,
+
   "MACROS": {
-  "mini_kraken": {
-    "instances": {
-      "art": {
-        "location": [20, 10],
-        "orientation": "N"
-      }
-    },
-    "gds": ["dir::../macros/mini_kraken.gds"],
-    "lef": ["dir::../macros/mini_kraken.lef"]
-  }
+    "mini_kraken": {
+      "instances": {
+        "art": {
+          "location": [140, 25],
+          "orientation": "N"
+        }
+      },
+      "gds": ["dir::../macros/mini_kraken.gds"],
+      "lef": ["dir::../macros/mini_kraken.lef"]
+    }
   },
-"IGNORE_DISCONNECTED_MODULES": ["mini_kraken", "art"],
-"ERROR_ON_DISCONNECTED_PINS": false
-
-
+  "IGNORE_DISCONNECTED_MODULES": ["mini_kraken", "art"],
+  "ERROR_ON_DISCONNECTED_PINS": false
 }

@@ -22,10 +22,11 @@ OUT_DIR = REPO / "macros"
 
 CELL_NAME = "mini_kraken"
 
-# IHP TopMetal1 min width/spacing ≈ 1.64 µm. Use a comfortable pitch and
-# slightly oversized pixel rects so diagonal stairs don't leave thin necks.
-PIXEL_UM = 4.0
-PIXEL_DRAW_UM = 4.2  # small overlap before boolean merge
+# IHP TopMetal1 min width/spacing ≈ 1.64 µm. Keep art small so it fits
+# between PDN straps on a 1x2 tile; slight pixel overlap + boolean merge
+# avoids thin necks at diagonal staircase jogs.
+PIXEL_UM = 3.0
+PIXEL_DRAW_UM = 3.2  # small overlap before boolean merge
 MARGIN_UM = 2.0  # keep art off the LEF boundary / PDN edges
 
 # IHP SG13G2 (Tiny Tapeout silicon-art guide)
