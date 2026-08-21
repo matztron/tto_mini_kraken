@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rasterize mini_kraken.png into IHP TopMetal1 GDS + LEF for Tiny Tapeout.
+"""Rasterize heart_a.png into IHP TopMetal1 GDS + LEF for Tiny Tapeout.
 
 Fixes Magic TM1.a / TM1.b (Metal6 min width/spacing ~1.64 µm) by:
   - using a larger pixel pitch than the minimum rule
@@ -17,7 +17,7 @@ from PIL import Image
 # --- paths ---
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
-PNG_PATH = HERE / "mini_kraken.png"
+PNG_PATH = HERE / "heart_a.png"
 OUT_DIR = REPO / "macros"
 
 CELL_NAME = "mini_kraken"
