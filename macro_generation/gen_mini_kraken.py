@@ -22,12 +22,12 @@ OUT_DIR = REPO / "macros"
 
 CELL_NAME = "mini_kraken"
 
-# IHP TopMetal1 min width/spacing ≈ 1.64 µm. Keep art small so it fits
-# between PDN straps on a 1x2 tile; slight pixel overlap + boolean merge
-# avoids thin necks at diagonal staircase jogs.
-PIXEL_UM = 3.0
-PIXEL_DRAW_UM = 3.2  # small overlap before boolean merge
-MARGIN_UM = 2.0  # keep art off the LEF boundary / PDN edges
+# Fit inside one PDN bay (pitch 38.87 µm): total macro < ~30 µm.
+# TopMetal1 min width/spacing ≈ 1.64 µm → pixel pitch must stay above that.
+GRID_PX = 16  # downsample 24x24 artwork for the small sticker
+PIXEL_UM = 1.7
+PIXEL_DRAW_UM = 1.75  # slight overlap before boolean merge
+MARGIN_UM = 1.0
 
 # IHP SG13G2 (Tiny Tapeout silicon-art guide)
 ART_LAYER = 126  # TopMetal1
@@ -91,6 +91,8 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     im = Image.open(PNG_PATH).convert("RGBA")
+    if im.size != (GRID_PX, GRID_PX):
+        im = im.resize((GRID_PX, GRID_PX), getattr(Image, "Resampling", Image).NEAREST)
     w, h = im.size
     mask = thicken_diagonals(opaque_mask(im))
 
@@ -101,6 +103,10 @@ def main() -> None:
     art_h = h * PIXEL_UM
     width_um = art_w + 2 * MARGIN_UM
     height_um = art_h + 2 * MARGIN_UM
+    if width_um >= 30.0 or height_um >= 30.0:
+        raise SystemExit(
+            f"macro {width_um:.1f}x{height_um:.1f} µm exceeds <30 µm PDN-bay budget"
+        )
 
     # Place-and-route footprint (required)
     cell.add(
@@ -152,7 +158,7 @@ def main() -> None:
     write_lef(lef_path, CELL_NAME, width_um, height_um)
     cell.write_svg(str(svg_path))
 
-    print(f"PNG:    {PNG_PATH} ({w}x{h})")
+    print(f"PNG:    {PNG_PATH} → {w}x{h} grid")
     print(
         f"metal:  {metal} pixels @ {PIXEL_UM} µm "
         f"(draw {PIXEL_DRAW_UM} µm, merged) → {width_um:.1f} x {height_um:.1f} µm"

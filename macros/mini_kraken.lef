@@ -10,6 +10,6 @@ END UNITS
 MACRO mini_kraken
    CLASS BLOCK ;
    FOREIGN mini_kraken 0 0 ;
-   SIZE 76.000 BY 76.000 ;
+   SIZE 29.200 BY 29.200 ;
    SYMMETRY X Y ;
 END mini_kraken

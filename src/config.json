@@ -81,7 +81,7 @@
     "mini_kraken": {
       "instances": {
         "art": {
-          "location": [140, 25],
+          "location": [17, 40],
           "orientation": "N"
         }
       },
