@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Rasterize mini_kraken.png into IHP TopMetal1 GDS + LEF for Tiny Tapeout."""
+"""Rasterize mini_kraken.png into IHP TopMetal1 GDS + LEF for Tiny Tapeout.
+
+Fixes Magic TM1.a / TM1.b (Metal6 min width/spacing ~1.64 µm) by:
+  - using a larger pixel pitch than the minimum rule
+  - boolean-OR merging abutting pixel rectangles into solid polygons
+    (avoids thin necks at diagonal staircase jogs)
+"""
 
 from __future__ import annotations
 
@@ -15,12 +21,17 @@ PNG_PATH = HERE / "mini_kraken.png"
 OUT_DIR = REPO / "macros"
 
 CELL_NAME = "mini_kraken"
-PIXEL_UM = 3.0  # ~72 µm for 24x24; keep >= ~2.0 for TopMetal1 DRC
+
+# IHP TopMetal1 min width/spacing ≈ 1.64 µm. Use a comfortable pitch and
+# slightly oversized pixel rects so diagonal stairs don't leave thin necks.
+PIXEL_UM = 4.0
+PIXEL_DRAW_UM = 4.2  # small overlap before boolean merge
+MARGIN_UM = 2.0  # keep art off the LEF boundary / PDN edges
 
 # IHP SG13G2 (Tiny Tapeout silicon-art guide)
-ART_LAYER = 126          # TopMetal1
+ART_LAYER = 126  # TopMetal1
 ART_DATATYPE = 0
-BOUNDARY_LAYER = 189     # prBoundary
+BOUNDARY_LAYER = 189  # prBoundary
 BOUNDARY_DATATYPE = 4
 
 
@@ -45,6 +56,33 @@ END {cell_name}
     )
 
 
+def opaque_mask(im: Image.Image) -> list[list[bool]]:
+    """True where PNG is opaque (metal)."""
+    w, h = im.size
+    pixels = im.load()
+    return [[pixels[x, y][3] >= 128 for x in range(w)] for y in range(h)]
+
+
+def thicken_diagonals(mask: list[list[bool]]) -> list[list[bool]]:
+    """Fill empty pixels that sit between diagonal-only metal (closes TM1 jogs)."""
+    h = len(mask)
+    w = len(mask[0])
+    out = [row[:] for row in mask]
+    for y in range(h):
+        for x in range(w):
+            if mask[y][x]:
+                continue
+            # NW-SE diagonal pair
+            nw = y > 0 and x > 0 and mask[y - 1][x - 1]
+            se = y + 1 < h and x + 1 < w and mask[y + 1][x + 1]
+            # NE-SW diagonal pair
+            ne = y > 0 and x + 1 < w and mask[y - 1][x + 1]
+            sw = y + 1 < h and x > 0 and mask[y + 1][x - 1]
+            if (nw and se) or (ne and sw):
+                out[y][x] = True
+    return out
+
+
 def main() -> None:
     if not PNG_PATH.is_file():
         raise SystemExit(f"missing PNG: {PNG_PATH}")
@@ -53,13 +91,15 @@ def main() -> None:
 
     im = Image.open(PNG_PATH).convert("RGBA")
     w, h = im.size
-    pixels = im.load()
+    mask = thicken_diagonals(opaque_mask(im))
 
     lib = gdstk.Library()
     cell = lib.new_cell(CELL_NAME)
 
-    width_um = w * PIXEL_UM
-    height_um = h * PIXEL_UM
+    art_w = w * PIXEL_UM
+    art_h = h * PIXEL_UM
+    width_um = art_w + 2 * MARGIN_UM
+    height_um = art_h + 2 * MARGIN_UM
 
     # Place-and-route footprint (required)
     cell.add(
@@ -71,25 +111,37 @@ def main() -> None:
         )
     )
 
+    rects: list[gdstk.Polygon] = []
     metal = 0
+    inset = (PIXEL_DRAW_UM - PIXEL_UM) / 2.0
     for y in range(h):
         for x in range(w):
-            r, g, b, a = pixels[x, y]
-            # Your art is opaque black on transparent → metal = opaque
-            if a < 128:
+            if not mask[y][x]:
                 continue
             # PNG y=0 is top; GDS y grows upward
-            x0 = x * PIXEL_UM
-            y0 = (h - 1 - y) * PIXEL_UM
-            cell.add(
+            x0 = MARGIN_UM + x * PIXEL_UM - inset
+            y0 = MARGIN_UM + (h - 1 - y) * PIXEL_UM - inset
+            rects.append(
                 gdstk.rectangle(
                     (x0, y0),
-                    (x0 + PIXEL_UM, y0 + PIXEL_UM),
-                    layer=ART_LAYER,
-                    datatype=ART_DATATYPE,
+                    (x0 + PIXEL_DRAW_UM, y0 + PIXEL_DRAW_UM),
                 )
             )
             metal += 1
+
+    if not rects:
+        raise SystemExit("no opaque pixels found in PNG")
+
+    # Merge into solid TopMetal1 polygons (critical for Magic TM1 DRC).
+    merged = gdstk.boolean(
+        rects,
+        [],
+        "or",
+        layer=ART_LAYER,
+        datatype=ART_DATATYPE,
+    )
+    for poly in merged:
+        cell.add(poly)
 
     gds_path = OUT_DIR / f"{CELL_NAME}.gds"
     lef_path = OUT_DIR / f"{CELL_NAME}.lef"
@@ -100,7 +152,11 @@ def main() -> None:
     cell.write_svg(str(svg_path))
 
     print(f"PNG:    {PNG_PATH} ({w}x{h})")
-    print(f"metal:  {metal} pixels @ {PIXEL_UM} µm → {width_um:.1f} x {height_um:.1f} µm")
+    print(
+        f"metal:  {metal} pixels @ {PIXEL_UM} µm "
+        f"(draw {PIXEL_DRAW_UM} µm, merged) → {width_um:.1f} x {height_um:.1f} µm"
+    )
+    print(f"polys:  {len(merged)}")
     print(f"wrote:  {gds_path}")
     print(f"        {lef_path}")
     print(f"        {svg_path}")
