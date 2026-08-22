@@ -79,7 +79,7 @@
 
   "//": "Art macros: usable gap ≈ FP_PDN_VPITCH − 8µm strap width.",
   "//": "  gap n left edge = FP_PDN_VOFFSET + n*FP_PDN_VPITCH + 8",
-  "//": "  kraken (29.2µm): centered in gap n=1 → [59.70, 80]",
+  "//": "  kraken (29.2µm): gap n=1, nudged right for TM1.b clearance → [60.50, 80]",
   "//": "  alina_p (15.6µm): gap n=2, 2.78µm inset (matches proven 61.65) → [100.52, 80]",
 
   "MACROS": {
@@ -96,7 +96,7 @@
     "mini_kraken": {
       "instances": {
         "kraken": {
-          "location": [59.70, 80],
+          "location": [60.50, 80],
           "orientation": "N"
         }
       },
