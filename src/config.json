@@ -75,5 +75,20 @@
 
   "//": "Silicon art: pinless TopMetal doodle is missing from Magic extraction,",
   "//": "so LVS cannot match the Verilog blackbox. Re-enable after a proper LVS stub.",
-  "RUN_LVS": false
+  "RUN_LVS": false,
+
+  "MACROS": {
+    "mini_kraken": {
+      "instances": {
+        "art": {
+          "location": [55.7, 80],
+          "orientation": "N"
+        }
+      },
+      "gds": ["dir::../macros/mini_kraken.gds"],
+      "lef": ["dir::../macros/mini_kraken.lef"]
+    }
+  },
+  "IGNORE_DISCONNECTED_MODULES": ["mini_kraken", "art"],
+  "ERROR_ON_DISCONNECTED_PINS": false
 }

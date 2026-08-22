@@ -6,9 +6,9 @@
 `default_nettype none
 
 // Art
-//(* blackbox *) (* keep *)
-//module mini_kraken ();
-//endmodule
+(* blackbox *) (* keep *)
+module mini_kraken ();
+endmodule
 
 module tt_um_mini_kraken (
     input  wire [7:0] ui_in,    // Dedicated inputs
@@ -34,8 +34,8 @@ module tt_um_mini_kraken (
   );
 
   // Art
-  //(* keep *)
-  //mini_kraken art ();
+  (* keep *)
+  mini_kraken art ();
 endmodule
 
 // for config.json:

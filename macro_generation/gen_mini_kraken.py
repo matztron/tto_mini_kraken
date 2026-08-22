@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Rasterize heart_a.png into IHP TopMetal1 GDS + LEF for Tiny Tapeout.
+"""Rasterize alina_p.png into IHP TopMetal1 GDS + LEF for Tiny Tapeout.
 
 Fixes Magic TM1.a / TM1.b (Metal6 min width/spacing ~1.64 µm) by:
   - using a larger pixel pitch than the minimum rule
   - boolean-OR merging abutting pixel rectangles into solid polygons
-    (avoids thin necks at diagonal staircase jogs)
+  - optional diagonal thickening (off for block lettering — preserves counters)
 """
 
 from __future__ import annotations
@@ -17,17 +17,22 @@ from PIL import Image
 # --- paths ---
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
-PNG_PATH = HERE / "heart_a.png"
+PNG_PATH = HERE / "alina_p.png"
 OUT_DIR = REPO / "macros"
 
 CELL_NAME = "mini_kraken"
 
-# Fit inside one PDN bay (pitch 38.87 µm): total macro < ~30 µm.
+# Width must fit one PDN bay (pitch 38.87 µm): macro width < ~30 µm.
+# Height may span vertically along the strap column (tall vertical lettering).
 # TopMetal1 min width/spacing ≈ 1.64 µm → pixel pitch must stay above that.
-GRID_PX = 16  # downsample 24x24 artwork for the small sticker
+GRID_W, GRID_H = 7, 45
+MAX_WIDTH_UM = 30.0
 PIXEL_UM = 1.7
-PIXEL_DRAW_UM = 1.75  # slight overlap before boolean merge
+PIXEL_DRAW_UM = 1.7  # match pitch so 1px letter counters stay open
 MARGIN_UM = 1.0
+
+# Block letters: keep False so A/N holes are not filled. Curvy art may need True.
+THICKEN_DIAGONALS = False
 
 # IHP SG13G2 (Tiny Tapeout silicon-art guide)
 ART_LAYER = 126  # TopMetal1
@@ -91,10 +96,13 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     im = Image.open(PNG_PATH).convert("RGBA")
-    if im.size != (GRID_PX, GRID_PX):
-        im = im.resize((GRID_PX, GRID_PX), getattr(Image, "Resampling", Image).NEAREST)
+    target = (GRID_W, GRID_H)
+    if im.size != target:
+        im = im.resize(target, getattr(Image, "Resampling", Image).NEAREST)
     w, h = im.size
-    mask = thicken_diagonals(opaque_mask(im))
+    mask = opaque_mask(im)
+    if THICKEN_DIAGONALS:
+        mask = thicken_diagonals(mask)
 
     lib = gdstk.Library()
     cell = lib.new_cell(CELL_NAME)
@@ -103,9 +111,9 @@ def main() -> None:
     art_h = h * PIXEL_UM
     width_um = art_w + 2 * MARGIN_UM
     height_um = art_h + 2 * MARGIN_UM
-    if width_um >= 30.0 or height_um >= 30.0:
+    if width_um >= MAX_WIDTH_UM:
         raise SystemExit(
-            f"macro {width_um:.1f}x{height_um:.1f} µm exceeds <30 µm PDN-bay budget"
+            f"macro width {width_um:.1f} µm exceeds {MAX_WIDTH_UM} µm PDN-bay budget"
         )
 
     # Place-and-route footprint (required)
