@@ -6,9 +6,9 @@
 `default_nettype none
 
 // Art
-(* blackbox *) (* keep *)
-module mini_kraken ();
-endmodule
+//(* blackbox *) (* keep *)
+//module mini_kraken ();
+//endmodule
 
 module tt_um_mini_kraken (
     input  wire [7:0] ui_in,    // Dedicated inputs
@@ -34,6 +34,24 @@ module tt_um_mini_kraken (
   );
 
   // Art
-  (* keep *)
-  mini_kraken art ();
+  //(* keep *)
+  //mini_kraken art ();
 endmodule
+
+// for config.json:
+/*
+"MACROS": {
+    "mini_kraken": {
+      "instances": {
+        "art": {
+          "location": [55.7, 80],
+          "orientation": "N"
+        }
+      },
+      "gds": ["dir::../macros/mini_kraken.gds"],
+      "lef": ["dir::../macros/mini_kraken.lef"]
+    }
+  },
+  "IGNORE_DISCONNECTED_MODULES": ["mini_kraken", "art"],
+  "ERROR_ON_DISCONNECTED_PINS": false
+*/
