@@ -14,8 +14,9 @@ from PIL import Image
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
-# Prefer high-res source; fall back to hand-drawn PNG.
+# Prefer thicker hand-tuned grid; then thin grid; then high-res squid.
 HIGH_RES_PATH = REPO / "imgs" / "squid_1.png"
+PNG_THICKER_PATH = HERE / "mini_kraken_thicker.png"
 PNG_PATH = HERE / "mini_kraken.png"
 OUT_DIR = REPO / "macros"
 
@@ -137,15 +138,20 @@ def fit_grid(im: Image.Image) -> Image.Image:
 
 
 def load_source() -> tuple[Image.Image, Path]:
-    """Use the hand-tuned grid PNG when it fits; otherwise build from squid_1.png."""
-    if PNG_PATH.is_file():
-        im = Image.open(PNG_PATH).convert("RGBA")
-        if im.size[0] <= MAX_W_PX and im.size[1] <= MAX_H_PX:
-            return im, PNG_PATH
+    """Prefer thicker hand-tuned PNG, then thin grid, else squid_1.png."""
+    for path in (PNG_THICKER_PATH, PNG_PATH):
+        if path.is_file():
+            im = Image.open(path).convert("RGBA")
+            if im.size[0] <= MAX_W_PX and im.size[1] <= MAX_H_PX:
+                return im, path
     if HIGH_RES_PATH.is_file():
         return Image.open(HIGH_RES_PATH).convert("RGBA"), HIGH_RES_PATH
+    if PNG_THICKER_PATH.is_file():
+        return Image.open(PNG_THICKER_PATH).convert("RGBA"), PNG_THICKER_PATH
     if not PNG_PATH.is_file():
-        raise SystemExit(f"missing PNG: {PNG_PATH} (and no {HIGH_RES_PATH})")
+        raise SystemExit(
+            f"missing PNG: {PNG_THICKER_PATH} / {PNG_PATH} (and no {HIGH_RES_PATH})"
+        )
     return Image.open(PNG_PATH).convert("RGBA"), PNG_PATH
 
 
@@ -176,7 +182,8 @@ def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     raw, src = load_source()
-    if src == PNG_PATH:
+    # Hand-tuned grids (thin or thicker) are used as-is; high-res gets cropped/downsampled.
+    if src in (PNG_PATH, PNG_THICKER_PATH) and raw.size[0] <= MAX_W_PX and raw.size[1] <= MAX_H_PX:
         im = raw
         mask = opaque_mask(im)
         cropped = im
@@ -189,7 +196,7 @@ def main() -> None:
             mask = opaque_mask(im)
     w, h = im.size
 
-    # Save the processed grid PNG for editing / preview.
+    # Save a processed preview grid (does not overwrite the thicker source).
     grid_path = HERE / "mini_kraken.png"
     im.save(grid_path)
     if THICKEN_DIAGONALS:
