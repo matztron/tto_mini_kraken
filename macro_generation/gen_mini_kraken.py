@@ -30,6 +30,7 @@ MAX_WIDTH_UM = 30.0
 PIXEL_UM = 1.7
 PIXEL_DRAW_UM = 1.7  # match pitch so 1px letter counters stay open
 MARGIN_UM = 1.0
+MARGIN_LEFT_UM = 2.7  # extra clearance from adjacent TopMetal1 (~1 px) at bay edge
 
 # Block letters: keep False so A/N holes are not filled. Curvy art may need True.
 THICKEN_DIAGONALS = False
@@ -109,7 +110,7 @@ def main() -> None:
 
     art_w = w * PIXEL_UM
     art_h = h * PIXEL_UM
-    width_um = art_w + 2 * MARGIN_UM
+    width_um = art_w + MARGIN_LEFT_UM + MARGIN_UM
     height_um = art_h + 2 * MARGIN_UM
     if width_um >= MAX_WIDTH_UM:
         raise SystemExit(
@@ -134,7 +135,7 @@ def main() -> None:
             if not mask[y][x]:
                 continue
             # PNG y=0 is top; GDS y grows upward
-            x0 = MARGIN_UM + x * PIXEL_UM - inset
+            x0 = MARGIN_LEFT_UM + x * PIXEL_UM - inset
             y0 = MARGIN_UM + (h - 1 - y) * PIXEL_UM - inset
             rects.append(
                 gdstk.rectangle(
