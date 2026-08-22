@@ -81,7 +81,7 @@
     "alina_p": {
       "instances": {
         "art": {
-          "location": [61.65, 80],
+          "location": [100.52, 80],
           "orientation": "N"
         }
       },
@@ -91,7 +91,7 @@
     "mini_kraken": {
       "instances": {
         "kraken": {
-          "location": [16.84, 15],
+          "location": [59.70, 80],
           "orientation": "N"
         }
       },
