@@ -78,17 +78,17 @@
   "RUN_LVS": false,
 
   "MACROS": {
-    "mini_kraken": {
+    "alina_p": {
       "instances": {
         "art": {
           "location": [61.65, 80],
           "orientation": "N"
         }
       },
-      "gds": ["dir::../macros/mini_kraken.gds"],
-      "lef": ["dir::../macros/mini_kraken.lef"]
+      "gds": ["dir::../macros/alina_p.gds"],
+      "lef": ["dir::../macros/alina_p.lef"]
     }
   },
-  "IGNORE_DISCONNECTED_MODULES": ["mini_kraken", "art"],
+  "IGNORE_DISCONNECTED_MODULES": ["alina_p", "art"],
   "ERROR_ON_DISCONNECTED_PINS": false
 }

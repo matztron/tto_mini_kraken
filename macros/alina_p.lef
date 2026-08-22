@@ -1,4 +1,4 @@
-# LEF generated for mini_kraken
+# LEF generated for alina_p
 VERSION 5.8 ;
 NAMESCASESENSITIVE ON ;
 DIVIDERCHAR "/" ;
@@ -7,9 +7,9 @@ UNITS
    DATABASE MICRONS 1000 ;
 END UNITS
 
-MACRO mini_kraken
+MACRO alina_p
    CLASS BLOCK ;
-   FOREIGN mini_kraken 0 0 ;
+   FOREIGN alina_p 0 0 ;
    SIZE 15.600 BY 78.500 ;
    SYMMETRY X Y ;
-END mini_kraken
+END alina_p

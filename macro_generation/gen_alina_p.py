@@ -20,7 +20,7 @@ REPO = HERE.parent
 PNG_PATH = HERE / "alina_p.png"
 OUT_DIR = REPO / "macros"
 
-CELL_NAME = "mini_kraken"
+CELL_NAME = "alina_p"
 
 # Width must fit one PDN bay (pitch 38.87 µm): macro width < ~30 µm.
 # Height may span vertically along the strap column (tall vertical lettering).

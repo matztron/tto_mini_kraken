@@ -7,7 +7,7 @@
 
 // Art
 (* blackbox *) (* keep *)
-module mini_kraken ();
+module alina_p ();
 endmodule
 
 module tt_um_mini_kraken (
@@ -35,23 +35,5 @@ module tt_um_mini_kraken (
 
   // Art
   (* keep *)
-  mini_kraken art ();
+  alina_p art ();
 endmodule
-
-// for config.json:
-/*
-"MACROS": {
-    "mini_kraken": {
-      "instances": {
-        "art": {
-          "location": [61.65, 80],
-          "orientation": "N"
-        }
-      },
-      "gds": ["dir::../macros/mini_kraken.gds"],
-      "lef": ["dir::../macros/mini_kraken.lef"]
-    }
-  },
-  "IGNORE_DISCONNECTED_MODULES": ["mini_kraken", "art"],
-  "ERROR_ON_DISCONNECTED_PINS": false
-*/
