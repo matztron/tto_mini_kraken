@@ -44,7 +44,7 @@ endmodule
     "mini_kraken": {
       "instances": {
         "art": {
-          "location": [55.7, 80],
+          "location": [61.65, 80],
           "orientation": "N"
         }
       },
